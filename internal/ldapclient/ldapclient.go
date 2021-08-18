@@ -220,6 +220,9 @@ func (cli *Client) FindOIDCClaims(ctx context.Context, username string) (map[str
 		roles[appID] = append(appRoles, entry[cli.RoleAttr])
 	}
 	claims[cli.RoleClaim] = roles
+	for name, entry := range roles {
+		claims[cli.RoleClaim+"/"+name] = entry
+	}
 
 	// Save the claims in the cache for future queries.
 	cdata, err := json.Marshal(claims)
