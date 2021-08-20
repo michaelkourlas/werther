@@ -30,21 +30,25 @@ func (crd *ConsentReqDoer) InitiateRequest(challenge string) (*ReqInfo, error) {
 }
 
 // AcceptConsentRequest accepts the requested authentication process, and returns redirect URI.
-func (crd *ConsentReqDoer) AcceptConsentRequest(challenge string, remember bool, grantScope []string, idToken interface{}) (string, error) {
+func (crd *ConsentReqDoer) AcceptConsentRequest(challenge string, remember bool, grantScope []string, grantAudience []string, claims interface{}) (string, error) {
 	type session struct {
 		IDToken interface{} `json:"id_token,omitempty"`
+		AccessToken interface{} `json:"access_token,omitempty"`
 	}
 	data := struct {
-		GrantScope  []string `json:"grant_scope"`
-		Remember    bool     `json:"remember"`
-		RememberFor int      `json:"remember_for"`
-		Session     session  `json:"session,omitempty"`
+		GrantScope    []string `json:"grant_scope"`
+		GrantAudience []string `json:"grant_access_token_audience"`
+		Remember      bool     `json:"remember"`
+		RememberFor   int      `json:"remember_for"`
+		Session       session  `json:"session,omitempty"`
 	}{
 		GrantScope:  grantScope,
+		GrantAudience: grantAudience,
 		Remember:    remember,
 		RememberFor: crd.rememberFor,
 		Session: session{
-			IDToken: idToken,
+			IDToken: claims,
+			AccessToken: claims,
 		},
 	}
 	redirectURI, err := acceptRequest(consent, crd.hydraURL, crd.fakeTLSTermination, challenge, data)
